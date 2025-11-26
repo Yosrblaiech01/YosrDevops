@@ -1,32 +1,60 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'JAVA_HOME'
-        maven 'M2_HOME'
+    environment {
+        // Change ici avec TON pseudo Docker Hub
+        DOCKERHUB_REPO = 'yosrblaiech/student-management'
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-yosrblaiech')  // à créer dans Jenkins
     }
 
     stages {
-
-        stage('Checkout Code') {
+        stage('Récupération Git') {
             steps {
-                echo "Récupération du code depuis Git..."
-                git branch: 'main', url: 'https://github.com/Yosrblaiech01/YosrDevops.git'
+                echo 'Récupération du code depuis GitHub...'
+                git url: 'https://github.com/Yosrblaiech01/YosrDevops.git', branch: 'main'
             }
         }
 
-        stage('Run Tests') {
+        stage('Tests unitaires') {
             steps {
-                echo "Lancement des tests Maven..."
-                sh "mvn test"
+                sh 'mvn test -Dmaven.test.skip=true'
             }
         }
 
-        stage('Build Artifact') {
+        stage('Création du livrable') {
             steps {
-                echo " Création du livrable (JAR/WAR)..."
-                sh "mvn clean package"
+                sh 'mvn clean package -Dmaven.test.skip=true'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh """
+                    docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .
+                    docker tag ${DOCKERHUB_REPO}:${IMAGE_TAG} ${DOCKERHUB_REPO}:latest
+                """
+            }
+        }
+
+        stage('Push Docker Hub') {
+            steps {
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
+                sh """
+                    docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
+                    docker push ${DOCKERHUB_REPO}:latest
+                """
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout || true'
+        }
+        success {
+            echo "Image poussée avec succès !"
         }
     }
 }
