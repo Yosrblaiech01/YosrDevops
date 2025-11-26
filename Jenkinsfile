@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Change ici avec TON pseudo Docker Hub
-        DOCKERHUB_REPO = 'Yosrblaiech01/YosrDevops'
+        DOCKERHUB_REPO = 'yosrblaiech/alpine'
         IMAGE_TAG = "${BUILD_NUMBER}"
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-yosrblaiech')  // à créer dans Jenkins
     }
