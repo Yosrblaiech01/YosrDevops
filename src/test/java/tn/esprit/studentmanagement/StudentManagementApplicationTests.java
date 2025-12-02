@@ -6,8 +6,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class StudentManagementApplicationTests {
 
-    @Test
-    void contextLoads() {
+   @Test
+    void testAddition() {
+        int a = 2;
+        int b = 3;
+        int result = a + b;
+
+        // Vérifie que 2 + 3 = 5
+        assertEquals(5, result);
     }
 
 }
