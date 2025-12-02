@@ -31,7 +31,7 @@ pipeline {
         /* --------------------------
               🌟 SONARQUBE ICI 🌟
            -------------------------- */
-       stage('SonarQube Analysis') {
+      /* stage('SonarQube Analysis') {
             steps {
                 withCredentials([string(credentialsId: 'sonarqube-token', variable: 'TOKEN')]) {
                     sh """
@@ -42,7 +42,21 @@ pipeline {
                     """
                 }
             }
+        }*/
+        stage('SonarQube Analysis') {
+    steps {
+        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'TOKEN')]) {
+            sh """
+                mvn sonar:sonar \
+                  -Dsonar.projectKey=YosrDevops \
+                  -Dsonar.host.url=http://localhost:9000 \
+                  -Dsonar.login=$TOKEN \
+                  -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            """
         }
+    }
+}
+
 
         stage('Package') {
             steps {
