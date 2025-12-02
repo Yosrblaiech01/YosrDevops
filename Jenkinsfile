@@ -16,11 +16,17 @@ pipeline {
             }
         }
 
-        stage('Tests unitaires') {
+       /* stage('Tests unitaires') {
             steps {
                 sh 'mvn test -Dmaven.test.skip=true'
             }
+        }*/
+        stage('Tests unitaires') {
+    steps {
+        sh 'mvn clean test'
         }
+    }
+
 
         /* --------------------------
               🌟 SONARQUBE ICI 🌟
