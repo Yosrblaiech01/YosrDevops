@@ -2,16 +2,16 @@ pipeline {
     agent any
 
     environment {
-        // Change ici avec TON pseudo Docker Hub
-        DOCKERHUB_REPO = 'yosrblaiech/yosrdevops'
-        IMAGE_TAG = "${BUILD_NUMBER}"
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-yosrblaiech')  // à créer dans Jenkins
+        M2_HOME = "/usr/share/maven"
+        PATH = "${env.M2_HOME}/bin:${env.PATH}"
+        DOCKERHUB_CREDENTIALS = 'dockerhub-yosrblaiech'
+        IMAGE_NAME = 'yosrblaiech/yosrdevops'
     }
 
     stages {
-        stage('Récupération Git') {
+
+        stage('Checkout') {
             steps {
-                echo 'Récupération du code depuis GitHub...'
                 git url: 'https://github.com/Yosrblaiech01/YosrDevops.git', branch: 'main'
             }
         }
@@ -22,7 +22,23 @@ pipeline {
             }
         }
 
-        stage('Création du livrable') {
+        /* --------------------------
+              🌟 SONARQUBE ICI 🌟
+           -------------------------- */
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'TOKEN')]) {
+                    sh """
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=YosrDevops \
+                          -Dsonar.host.url=http://localhost:9000 \
+                          -Dsonar.login=$TOKEN
+                    """
+                }
+            }
+        }
+
+        stage('Package') {
             steps {
                 sh 'mvn clean package -Dmaven.test.skip=true'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
@@ -32,29 +48,31 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh """
-                    docker build -t ${DOCKERHUB_REPO}:${IMAGE_TAG} .
-                    docker tag ${DOCKERHUB_REPO}:${IMAGE_TAG} ${DOCKERHUB_REPO}:latest
+                    docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                    docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest
                 """
             }
         }
 
-        stage('Push Docker Hub') {
+        stage('Push to DockerHub') {
             steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-                sh """
-                    docker push ${DOCKERHUB_REPO}:${IMAGE_TAG}
-                    docker push ${DOCKERHUB_REPO}:latest
-                """
+                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+
+                    sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+
+                    sh """
+                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker push ${IMAGE_NAME}:latest
+                    """
+                }
             }
         }
     }
 
     post {
-        always {
-            sh 'docker logout || true'
-        }
-        success {
-            echo "Image poussée avec succès !"
-        }
+        always { echo "Pipeline finished" }
+        success { echo "Build succeeded!" }
+        failure { echo "Build failed!" }
     }
 }
