@@ -26,7 +26,12 @@ pipeline {
         sh 'mvn clean test'
         }
     }
-
+      stage('Package') {
+            steps {
+                sh 'mvn clean package -Dmaven.test.skip=true'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
 
         /* --------------------------
               🌟 SONARQUBE ICI 🌟
@@ -59,12 +64,7 @@ pipeline {
 
 
 
-        stage('Package') {
-            steps {
-                sh 'mvn clean package -Dmaven.test.skip=true'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-            }
-        }
+       
 
         stage('Build Docker Image') {
             steps {
