@@ -2,7 +2,6 @@ package tn.esprit.studentmanagement.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,11 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class Student {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idStudent;
-
     private String firstName;
     private String lastName;
     private String email;
