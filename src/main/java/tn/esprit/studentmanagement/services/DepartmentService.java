@@ -5,13 +5,14 @@ import tn.esprit.studentmanagement.entities.Department;
 import tn.esprit.studentmanagement.repositories.DepartmentRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DepartmentService implements IDepartmentService {
 
     private final DepartmentRepository departmentRepository;
 
-    // Injection par constructeur (recommandée)
+    // Constructor injection
     public DepartmentService(DepartmentRepository departmentRepository) {
         this.departmentRepository = departmentRepository;
     }
@@ -23,8 +24,8 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public Department getDepartmentById(Long idDepartment) {
-        // Plus de .get() dangereux → SonarQube validé ✔️
-        return departmentRepository.findById(idDepartment).orElse(null);
+        Optional<Department> optionalDepartment = departmentRepository.findById(idDepartment);
+        return optionalDepartment.orElse(null); // or throw a custom exception if not found
     }
 
     @Override
