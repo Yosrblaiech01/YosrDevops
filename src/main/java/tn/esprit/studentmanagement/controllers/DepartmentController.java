@@ -8,12 +8,12 @@ import tn.esprit.studentmanagement.services.IDepartmentService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/Depatment")
+@RequestMapping("/Depatment") // Tu peux corriger en "/Department" si souhaité
 @CrossOrigin(origins = "http://localhost:4200")
 @AllArgsConstructor
 public class DepartmentController {
 
-    private IDepartmentService departmentService;
+    private final IDepartmentService departmentService;
 
     @GetMapping("/getAllDepartment")
     public List<Department> getAllDepartment() {
