@@ -5,13 +5,14 @@ import tn.esprit.studentmanagement.entities.Enrollment;
 import tn.esprit.studentmanagement.repositories.EnrollmentRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EnrollmentService implements IEnrollment {
 
     private final EnrollmentRepository enrollmentRepository;
 
-    // ✔️ Injection par constructeur (recommandée)
+    // Constructor injection
     public EnrollmentService(EnrollmentRepository enrollmentRepository) {
         this.enrollmentRepository = enrollmentRepository;
     }
@@ -23,8 +24,8 @@ public class EnrollmentService implements IEnrollment {
 
     @Override
     public Enrollment getEnrollmentById(Long idEnrollment) {
-        // ✔️ Correction du .get() dangereux
-        return enrollmentRepository.findById(idEnrollment).orElse(null);
+        Optional<Enrollment> optionalEnrollment = enrollmentRepository.findById(idEnrollment);
+        return optionalEnrollment.orElse(null); // or throw a custom NotFoundException
     }
 
     @Override
