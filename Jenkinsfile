@@ -23,7 +23,7 @@ pipeline {
         }*/
         stage('Tests unitaires') {
     steps {
-        sh 'mvn clean test'
+        sh 'mvn test -Dspring.profiles.active=test'
         }
     }
       stage('Package') {
