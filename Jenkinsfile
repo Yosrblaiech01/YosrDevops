@@ -21,18 +21,13 @@ pipeline {
                 sh 'mvn test -Dmaven.test.skip=true'
             }
         }*/
-        stage('Tests unitaires') {
-    steps {
-        sh 'mvn test -Dspring.profiles.active=test'
-        }
-    }
-      stage('Package') {
+      stage('Test') {
             steps {
-                sh 'mvn clean package -Dmaven.test.skip=true'
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                sh 'mvn test -Dspring.profiles.active=test'
             }
         }
 
+     
         /* --------------------------
               🌟 SONARQUBE ICI 🌟
            -------------------------- */
@@ -62,6 +57,11 @@ pipeline {
     }
 }
 
+ stage('Package') {
+            steps {
+                sh 'mvn package -Dspring.profiles.active=test'
+            }
+        }
 
 
        
