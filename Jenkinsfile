@@ -43,7 +43,7 @@ pipeline {
                 }
             }
         }*/
-        stage('Code Quality - SonarQube') {
+       stage('Code Quality - SonarQube') {
     steps {
         withSonarQubeEnv('local-sonarqube') {
             sh """
