@@ -44,6 +44,14 @@ pipeline {
             }
         }
 
+        
+        stage('Package') {
+            steps {
+                sh 'mvn package -Dspring.profiles.active=test'
+            }
+        }
+        
+
       stage('Code Quality - SonarQube') {
     steps {
         withCredentials([string(credentialsId: 'sonarqube-admin-token', variable: 'SONAR_TOKEN')]) {
@@ -60,11 +68,6 @@ pipeline {
 
 
 
-        stage('Package') {
-            steps {
-                sh 'mvn package -Dspring.profiles.active=test'
-            }
-        }
 
        
 
