@@ -44,14 +44,16 @@ pipeline {
             }
         }
 
-        stage('Code Quality - SonarQube') {
+      stage('Code Quality - SonarQube') {
     steps {
-        withSonarQubeEnv('local-sonarqube') {
-            sh """
+        withCredentials([string(credentialsId: 'sonarqube-admin-token', variable: 'SONAR_TOKEN')]) {
+            sh '''
                 mvn sonar:sonar \
                   -Dsonar.projectKey=student-management \
                   -Dsonar.projectName=student-management \
-            """
+                  -Dsonar.host.url=http://localhost:9000 \
+                  -Dsonar.token=$SONAR_TOKEN
+            '''
         }
     }
 }
