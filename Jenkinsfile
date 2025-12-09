@@ -43,19 +43,19 @@ pipeline {
                 }
             }
         }*/
-       stage('Code Quality - SonarQube') {
-    steps {
-        withSonarQubeEnv('local-sonarqube') {
-            sh """
-                mvn sonar:sonar \
-                  -Dsonar.projectKey=student-management \
-                  -Dsonar.projectName=student-management \
-                  -Dsonar.host.url=$SONAR_HOST_URL \
-                  -Dsonar.token=$SONAR_AUTH_TOKEN
-            """
+      stage('SonarQube Analysis') {
+            steps {
+                // Inject the SONAR_AUTH_TOKEN credential from Jenkins
+                withCredentials([string(credentialsId: 'SONAR_AUTH_TOKEN', variable: 'TOKEN')]) {
+                    sh """
+                        mvn sonar:sonar \
+                            -Dsonar.projectKey=YosrDevops \
+                            -Dsonar.host.url=http://localhost:9000 \
+                            -Dsonar.login=$TOKEN
+                    """
+                }
+            }
         }
-    }
-}
 
  stage('Package') {
             steps {
