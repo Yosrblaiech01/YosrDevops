@@ -48,15 +48,15 @@ pipeline {
                 }
             }
         }*/
-      stage('SonarQube Analysis') {
+        stage('Code Quality - SonarQube') {
     steps {
-        withCredentials([string(credentialsId: 'sonarqube-token', variable: 'TOKEN')]) {
+        withSonarQubeEnv('local-sonarqube') {
             sh """
                 mvn sonar:sonar \
-                  -Dsonar.projectKey=YosrDevops \
-                  -Dsonar.host.url=http://localhost:9000 \
-                  -Dsonar.login=$TOKEN \
-                  -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                  -Dsonar.projectKey=student-management \
+                  -Dsonar.projectName=student-management \
+                  -Dsonar.host.url=$SONAR_HOST_URL \
+                  -Dsonar.token=$SONAR_AUTH_TOKEN
             """
         }
     }
