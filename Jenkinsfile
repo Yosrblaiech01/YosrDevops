@@ -21,12 +21,7 @@ pipeline {
                 sh 'mvn test -Dmaven.test.skip=true'
             }
         }*/
-      stage('Test') {
-            steps {
-                sh 'mvn test -Dspring.profiles.active=test'
-            }
-        }
-
+     
      
         /* --------------------------
               🌟 SONARQUBE ICI 🌟
@@ -43,26 +38,33 @@ pipeline {
                 }
             }
         }*/
-      stage('SonarQube Analysis') {
+         stage('Test') {
             steps {
-                // Inject the SONAR_AUTH_TOKEN credential from Jenkins
-                withCredentials([string(credentialsId: 'SONAR_AUTH_TOKEN', variable: 'TOKEN')]) {
-                    sh """
-                        mvn sonar:sonar \
-                            -Dsonar.projectKey=YosrDevops \
-                            -Dsonar.host.url=http://localhost:9000 \
-                            -Dsonar.login=$TOKEN
-                    """
-                }
+                sh 'mvn test -Dspring.profiles.active=test'
             }
         }
 
- stage('Package') {
+        stage('Code Quality - SonarQube') {
+    steps {
+        withSonarQubeEnv('local-sonarqube') {
+            sh """
+                mvn sonar:sonar \
+                  -Dsonar.projectKey=student-management \
+                  -Dsonar.projectName=student-management \
+                  -Dsonar.host.url=$SONAR_HOST_URL \
+                  -Dsonar.token=$SONAR_AUTH_TOKEN
+            """
+        }
+    }
+}
+
+
+
+        stage('Package') {
             steps {
                 sh 'mvn package -Dspring.profiles.active=test'
             }
         }
-
 
        
 
