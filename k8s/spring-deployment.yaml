@@ -1,0 +1,61 @@
+# 1️⃣ ConfigMap (URL DB)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spring-config
+  namespace: devops
+data:
+  SPRING_DATASOURCE_URL: jdbc:mysql://mysql-service:3306/devopsdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+---
+# 2️⃣ Secret (credentials DB)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: spring-secret
+  namespace: devops
+type: Opaque
+data:
+  SPRING_DATASOURCE_USERNAME: cm9vdA==   # root
+  SPRING_DATASOURCE_PASSWORD: cm9vdA==   # root
+---
+# 3️⃣ Deployment Spring Boot
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spring-app
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spring-app
+  template:
+    metadata:
+      labels:
+        app: spring-app
+    spec:
+      containers:
+        - name: spring-app
+          image: yosrblaiech/yosrdevops
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: spring-config
+            - secretRef:
+                name: spring-secret
+---
+# 4️⃣ Service Spring Boot (NodePort)
+apiVersion: v1
+kind: Service
+metadata:
+  name: spring-service
+  namespace: devops
+spec:
+  type: NodePort
+  selector:
+    app: spring-app
+  ports:
+    - port: 8080
+      targetPort: 8080
