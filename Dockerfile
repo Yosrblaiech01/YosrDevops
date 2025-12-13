@@ -1,9 +1,11 @@
-FROM alpine:latest
+FROM eclipse-temurin:17-jdk-jammy
 
-RUN apk update && apk add openjdk11
+WORKDIR /app
 
-COPY target/*.jar app.jar
+# On copie le JAR correct (pas le .original)
+COPY target/student-management-0.0.1-SNAPSHOT.jar app.jar
 
+# Ton Spring Boot écoute sur 8080
 EXPOSE 8080
 
-CMD ["java", "-jar", "/app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
