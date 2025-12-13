@@ -16,60 +16,32 @@ pipeline {
             }
         }
 
-       /* stage('Tests unitaires') {
-            steps {
-                sh 'mvn test -Dmaven.test.skip=true'
-            }
-        }*/
-     
-     
-        /* --------------------------
-              🌟 SONARQUBE ICI 🌟
-           -------------------------- */
-      /* stage('SonarQube Analysis') {
-            steps {
-                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'TOKEN')]) {
-                    sh """
-                        mvn sonar:sonar \
-                          -Dsonar.projectKey=YosrDevops \
-                          -Dsonar.host.url=http://localhost:9000 \
-                          -Dsonar.login=$TOKEN
-                    """
-                }
-            }
-        }*/
-         stage('Test') {
+        stage('Test') {
             steps {
                 sh 'mvn test -Dspring.profiles.active=test'
             }
         }
 
-        
         stage('Package') {
             steps {
                 sh 'mvn package -Dspring.profiles.active=test'
             }
         }
-        
 
-      stage('Code Quality - SonarQube') {
-    steps {
-        withCredentials([string(credentialsId: 'sonarqube-admin-token', variable: 'SONAR_TOKEN')]) {
-            sh '''
-                mvn sonar:sonar \
-                  -Dsonar.projectKey=student-management \
-                  -Dsonar.projectName=student-management \
-                  -Dsonar.host.url=http://localhost:9000 \
-                  -Dsonar.token=$SONAR_TOKEN
-            '''
+        /* --------------------------
+              🌟 SONARQUBE 🌟
+           -------------------------- */
+        stage('Code Quality - SonarQube') {
+            steps {
+                withSonarQubeEnv('local-sonarqube') {
+                    sh '''
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=student-management \
+                          -Dsonar.projectName=student-management
+                    '''
+                }
+            }
         }
-    }
-}
-
-
-
-
-       
 
         stage('Build Docker Image') {
             steps {
@@ -82,9 +54,11 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}",
-                    usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKERHUB_CREDENTIALS}",
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
                     sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
 
                     sh """
@@ -97,7 +71,7 @@ pipeline {
     }
 
     post {
-        always { echo "Pipeline finished" }
+        always  { echo "Pipeline finished" }
         success { echo "Build succeeded!" }
         failure { echo "Build failed!" }
     }
